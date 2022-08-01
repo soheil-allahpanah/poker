@@ -8,12 +8,9 @@ import java.nio.charset.StandardCharsets;
 
 public class CoordinatorClientInitializer extends ChannelInitializer<Channel> {
 
-    private final IpAndPort hostPort;
-
     private final ChannelInboundHandlerAdapter handler;
 
-    CoordinatorClientInitializer(IpAndPort hostPort, ChannelInboundHandlerAdapter handler) {
-        this.hostPort = hostPort;
+    CoordinatorClientInitializer(ChannelInboundHandlerAdapter handler) {
         this.handler = handler;
     }
 
