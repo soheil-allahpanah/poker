@@ -2,24 +2,22 @@ package ir.sooall.poker.cordiantor.infra.interceptor;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import ir.sooall.poker.common.message.PokerMessage;
-import ir.sooall.poker.common.message.PokerRegisterMessage;
 import ir.sooall.poker.cordiantor.adaptor.in.contorller.RegisterPlayerController;
 import ir.sooall.poker.cordiantor.infra.config.ServiceRegistry;
+import ir.sooall.poker.player.client.message.PokerRequest;
+import ir.sooall.poker.player.client.message.RequestAction;
 
-public class PokerMessageDispatcher extends SimpleChannelInboundHandler<PokerMessage> {
+public class PokerMessageDispatcher extends SimpleChannelInboundHandler<PokerRequest> {
 
     private final RegisterPlayerController registerPlayerController = ServiceRegistry.getService(RegisterPlayerController.class);
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, PokerMessage pokerMessage) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, PokerRequest request) throws Exception {
         System.out.println("PokerMessageDispatcher >> channelRead0 >> ");
-        if (pokerMessage instanceof PokerRegisterMessage prm) {
-            System.out.println("PokerMessageDispatcher >> channelRead0 >>  PokerRegisterMessage ");
-            ctx.channel().writeAndFlush(registerPlayerController.register(prm));
-        } else {
-            throw new UnsupportedOperationException("Unsupported Poker Message");
+        if (request.getAction() == RequestAction.REGISTER) {
+            ctx.channel().writeAndFlush(registerPlayerController.register(request));
         }
+
     }
 
     @Override

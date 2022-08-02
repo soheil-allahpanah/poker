@@ -1,9 +1,9 @@
 package ir.sooall.poker.cordiantor.adaptor.in.contorller;
 
-import ir.sooall.poker.common.message.PokerMessage;
-import ir.sooall.poker.common.message.PokerRegisterMessage;
 import ir.sooall.poker.cordiantor.handler.PokerRegistrationProcessMessageMapper;
 import ir.sooall.poker.cordiantor.usecase.registerplayer.RegisterPlayerUseCase;
+import ir.sooall.poker.player.client.message.PokerRequest;
+import ir.sooall.poker.player.client.message.PokerResponse;
 
 public class RegisterPlayerController {
     private final RegisterPlayerUseCase registerPlayerUseCase;
@@ -18,8 +18,8 @@ public class RegisterPlayerController {
         nAckRegisterMessageMapper = new PokerRegistrationProcessMessageMapper.Player2NAckRegisterMessageMapper();
     }
 
-    public PokerMessage register(PokerMessage registerPokerMessage) {
-        var player = message2ObjectMapper.map((PokerRegisterMessage) registerPokerMessage);
+    public PokerResponse register(PokerRequest request) {
+        var player = message2ObjectMapper.map(request);
         try {
             return ackRegisterMessageMapper.map(registerPlayerUseCase.register(player));
         } catch (Exception exception) {

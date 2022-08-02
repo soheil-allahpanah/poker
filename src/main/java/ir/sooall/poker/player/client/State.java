@@ -1,11 +1,7 @@
 package ir.sooall.poker.player.client;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpContent;
-import io.netty.handler.codec.http.HttpResponse;
-import ir.sooall.poker.common.message.PokerMessage;
+import ir.sooall.poker.player.client.message.PokerResponse;
 
 import java.time.Duration;
 
@@ -60,10 +56,10 @@ public abstract class State<T> {
      * once for each chunk;  when the FullContentReceived event is fired,
      * there will be no more ContentReceived events.
      */
-    public static final class ContentReceived extends State<PokerMessage> {
+    public static final class ContentReceived extends State<PokerResponse> {
 
-        ContentReceived(PokerMessage message) {
-            super(PokerMessage.class, StateType.ContentReceived, message);
+        ContentReceived(PokerResponse message) {
+            super(PokerResponse.class, StateType.ContentReceived, message);
         }
     }
 
@@ -81,10 +77,10 @@ public abstract class State<T> {
      * Convenience state event providing the entire response and its body
      * as a FullHttpResponse.
      */
-    public static final class Finished extends State<PokerMessage> {
+    public static final class Finished extends State<PokerResponse> {
 
-        Finished(PokerMessage message) {
-            super(PokerMessage.class, StateType.Finished, message);
+        Finished(PokerResponse message) {
+            super(PokerResponse.class, StateType.Finished, message);
         }
     }
 

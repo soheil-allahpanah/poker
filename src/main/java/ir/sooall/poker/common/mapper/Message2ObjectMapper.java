@@ -1,7 +1,7 @@
 package ir.sooall.poker.common.mapper;
 
-import ir.sooall.poker.common.message.PokerMessage;
+import ir.sooall.poker.player.client.message.PokerObject;
 
-public interface Message2ObjectMapper<Message extends PokerMessage, Object> {
+public interface Message2ObjectMapper<Message extends PokerObject, Object> {
     Object map(Message message);
 }

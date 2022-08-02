@@ -1,6 +1,6 @@
 package ir.sooall.poker.player.client;
 
-import ir.sooall.poker.common.message.PokerMessage;
+import ir.sooall.poker.player.client.message.PokerResponse;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -22,19 +22,20 @@ public class ResponseHandler<T> {
         return latch.await(l, tu);
     }
 
-    protected void internalReceive(PokerMessage pokerMessage) {
+    protected void internalReceive(PokerResponse pokerMessage) {
         try {
+            _doReceive(pokerMessage);
             // todo : must be implemented
         } finally {
             latch.countDown();
         }
     }
 
-    void _doReceive(PokerMessage pokerMessage) {
+    void _doReceive(PokerResponse pokerMessage) {
         receive(pokerMessage);
     }
 
-    protected void receive(PokerMessage pokerMessage) {
+    protected void receive(PokerResponse pokerMessage) {
     }
 
     protected void onErrorResponse(String content) {

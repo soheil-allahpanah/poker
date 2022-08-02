@@ -3,7 +3,8 @@ package ir.sooall.poker.player.client;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import ir.sooall.poker.common.message.PokerMessage;
+import ir.sooall.poker.player.client.message.PokerResponse;
+
 import java.util.List;
 
 
@@ -33,20 +34,25 @@ public class CoordinatorClientHandler extends ByteToMessageDecoder {
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.readableBytes() : " + in.readableBytes());
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.readerIndex() : " + in.readerIndex());
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.capacity() : " + in.capacity());
-            byte[] decoded = new byte[in.readableBytes()];
-            in.readBytes(decoded);
-            System.out.println("PokerMessageDecoder >> channelRead0  String(decoded) : " + new String(decoded));
-            var messageObject = PokerMessage.decode(new String(decoded));
-            info.handle.event(new State.ContentReceived(messageObject));
-
-            if (info.r != null) {
-                info.r.internalReceive(messageObject);
+            if (in.readableBytes() > 4) {
+                int contentLength = in.readInt();
+                System.out.println("PokerMessageDecoder >> channelRead0  >> contentLength : " + contentLength);
+                if (in.readableBytes() == contentLength) {
+                    System.out.println("PokerMessageDecoder >> channelRead0  >> in.readableBytes() == contentLength : " + true);
+                    byte[] decoded = new byte[in.readableBytes()];
+                    in.readBytes(decoded);
+                    System.out.println("PokerMessageDecoder >> channelRead0  >> new String(decoded) : " + new String(decoded));
+                    var response = PokerResponse.fromString(new String(decoded));
+                    System.out.println("PokerMessageDecoder >> channelRead0  >> response : " + response);
+                    info.handle.event(new State.ContentReceived(response));
+                    out.add(response);
+                    if (info.r != null) {
+                        info.r.internalReceive(response);
+                    }
+                    info.handle.event(new State.Finished(response));
+                    info.handle.trigger();
+                }
             }
-            info.handle.event(new State.Finished(messageObject));
-
-            out.add(messageObject);
-            info.handle.trigger();
-
         } catch (IllegalStateException e) {
             info.handle.event(new State.Error(e));
             e.printStackTrace();
