@@ -4,10 +4,7 @@ import ir.sooall.poker.common.mapper.Message2ObjectMapper;
 import ir.sooall.poker.common.mapper.Object2MessageMapper;
 import ir.sooall.poker.common.model.Player;
 import ir.sooall.poker.common.model.ValueObjects;
-import ir.sooall.poker.player.client.message.PokerMessageHeader;
-import ir.sooall.poker.player.client.message.PokerRequest;
-import ir.sooall.poker.player.client.message.PokerResponse;
-import ir.sooall.poker.player.client.message.ResponseAction;
+import ir.sooall.poker.player.client.message.*;
 
 import java.util.UUID;
 
@@ -15,9 +12,10 @@ public interface PokerRegistrationProcessMessageMapper {
     class RegisterMessage2ObjectMapper implements Message2ObjectMapper<PokerRequest, Player> {
         @Override
         public Player map(PokerRequest message) {
-            return new Player(new ValueObjects.PlayerId(UUID.fromString(message.getContent().get("PLAYER_ID")))
-                , new ValueObjects.PlayerName(message.getContent().get("PLAYER_NAME"))
-                , new ValueObjects.NetAddress(message.getContent().get("PLAYER_IP"), Integer.valueOf(message.getContent().get("PLAYER_PORT")))
+            return new Player(new ValueObjects.PlayerId(UUID.fromString(message.content().get(PokerProtocolConstantKey.PLAYER_ID.name())))
+                , new ValueObjects.PlayerName(message.content().get(PokerProtocolConstantKey.PLAYER_NAME.name()))
+                , new ValueObjects.NetAddress(message.content().get(PokerProtocolConstantKey.PLAYER_HOST.name())
+                , Integer.valueOf(message.content().get(PokerProtocolConstantKey.PLAYER_PORT.name())))
                 , ValueObjects.PlayerStatus.REGISTERED);
         }
     }
@@ -31,7 +29,8 @@ public interface PokerRegistrationProcessMessageMapper {
                 .protocolVersion(PokerMessageHeader.POKER_PROTOCOL_VERSION)
                 .action(ResponseAction.ACK_REGISTER)
                 .content()
-                .addItem("PLAYER_ID",obj.id().value().toString())
+                .addItem(PokerProtocolConstantKey.PLAYER_ID.name(), obj.id().value().toString())
+                .addItem(PokerProtocolConstantKey.PLAYER_NAME.name(), obj.name().value())
                 .build();
         }
     }
@@ -45,8 +44,8 @@ public interface PokerRegistrationProcessMessageMapper {
                 .protocolVersion(PokerMessageHeader.POKER_PROTOCOL_VERSION)
                 .action(ResponseAction.NACK_REGISTER)
                 .content()
-                .addItem("ERROR_CODE", "409")
-                .addItem("ERROR_MESSAGE", "Duplicate Resource")
+                .addItem(PokerProtocolConstantKey.ERROR_CODE.name(), "409")
+                .addItem(PokerProtocolConstantKey.ERROR_MESSAGE.name(), "Duplicate Resource")
                 .build();
         }
     }

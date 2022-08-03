@@ -15,15 +15,10 @@ public class PokerMessageDecoder extends ByteToMessageDecoder {
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.readableBytes() : " + in.readableBytes());
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.readerIndex() : " + in.readerIndex());
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.capacity() : " + in.capacity());
-            if (in.readableBytes() > 4) {
-                int contentLength = in.readInt();
-                if (in.readableBytes() == contentLength) {
-                    byte[] decoded = new byte[in.readableBytes()];
-                    in.readBytes(decoded);
-                    System.out.println("PokerMessageDecoder >> channelRead0  String(decoded) : " + new String(decoded));
-                    out.add(PokerRequest.fromString(new String(decoded)));
-                }
-            }
+            byte[] decoded = new byte[in.readableBytes()];
+            in.readBytes(decoded);
+            System.out.println("PokerMessageDecoder >> channelRead0  String(decoded) : " + new String(decoded));
+            out.add(PokerRequest.fromString(new String(decoded)));
         } catch (Exception e) {
             e.printStackTrace();
         }

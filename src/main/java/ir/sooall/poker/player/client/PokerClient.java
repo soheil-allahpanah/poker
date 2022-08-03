@@ -8,7 +8,9 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.AttributeKey;
+import ir.sooall.poker.player.client.message.*;
 
+import javax.crypto.spec.PSource;
 import java.net.ConnectException;
 import java.time.Duration;
 import java.util.*;
@@ -27,6 +29,7 @@ public class PokerClient {
     private final Iterable<ChannelOptionSetting<?>> settings;
     private final Timer timer = new Timer("HttpClient timeout for HttpClient@" + System.identityHashCode(this));
     static final AttributeKey<RequestInfo> KEY = AttributeKey.<RequestInfo>valueOf("info");
+    private final CoordinatorClientHandler handler;
 
     public PokerClient() {
         this(null, Collections.emptyList(), null, 12);
@@ -36,13 +39,15 @@ public class PokerClient {
         group = threadPool == null ? new NioEventLoopGroup(threads, new TF()) : threadPool;
         this.timeout = timeout;
         this.settings = settings == null ? Collections.emptySet() : settings;
+        this.handler = new CoordinatorClientHandler(this);
+
     }
 
-    private synchronized Bootstrap start(IpAndPort ipAndPort) {
+    private synchronized Bootstrap start() {
         if (bootstrap == null) {
             bootstrap = new Bootstrap();
             bootstrap.group(group);
-            bootstrap.handler(new CoordinatorClientInitializer(new CoordinatorClientHandler(this)));
+            bootstrap.handler(new CoordinatorClientInitializer(handler));
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
             bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
             bootstrap.option(ChannelOption.SO_REUSEADDR, false);
@@ -146,13 +151,16 @@ public class PokerClient {
         return new PokerClientBuilder();
     }
 
-    public PokerRequestBuilder register() {
-        return new PRB(PokerAction.REGISTER);
+    public PokerRequest.Builder register() {
+        var pr = PokerRequest.builder(this);
+        pr.header().action(RequestAction.REGISTER);
+        return pr;
     }
 
-    private void submit(PokerRequest rq, final AtomicBoolean cancelled, final ResponseFuture handle,
+    public void submit(PokerRequest rq, final AtomicBoolean cancelled, final ResponseFuture handle,
                         final ResponseHandler<?> r, Duration timeout) {
         // Ensure the cancelled event is sent
+        System.out.println("Poker Client >> submit >> ");
         if (cancelled.get()) {
             handle.event(new State.Cancelled());
             return;
@@ -163,9 +171,12 @@ public class PokerClient {
 
         final PokerRequest req = rq;
         try {
-            Bootstrap bootstrap = start(req.ipAndPort());
+            Bootstrap bootstrap = start();
+            System.out.println("Poker Client >> submit >> bootstrap is given" + bootstrap);
             TimeoutTimerTask timerTask = null;
             RequestInfo info = new RequestInfo(req, cancelled, handle, r, timeout, null);
+            System.out.println("Poker Client >> submit >> bootstrap is created");
+
             if (timeout != null) {
                 timerTask = new TimeoutTimerTask(cancelled, handle, r, info);
                 timer.schedule(timerTask, timeout.toMillis());
@@ -176,13 +187,18 @@ public class PokerClient {
                 return;
             }
             handle.event(new State.Connecting());
+            System.out.println("Poker Client >> submit >> handle connecting");
+
             //XXX who is escaping this?
             ChannelFuture fut = bootstrap.connect(req.ipAndPort().ip(), req.ipAndPort().port());
             theChannel.set(fut.channel());
+            System.out.println("Poker Client >> submit >> bootstrap connected");
             if (timerTask != null) {
                 fut.channel().closeFuture().addListener(timerTask);
             }
             fut.channel().attr(KEY).set(info);
+            System.out.println("Poker Client >> submit >> KEY attribute is set");
+
             handle.setFuture(fut);
             if (r != null) {
                 handle.on(State.Error.class, new Receiver<>() {
@@ -201,6 +217,8 @@ public class PokerClient {
 
             fut.addListener((ChannelFutureListener) future -> {
                 if (!future.isSuccess()) {
+                    System.out.println("Poker Client >> submit >> fut listener >> failed");
+
                     Throwable cause = future.cause();
                     if (cause == null) {
                         cause = new ConnectException("Unknown problem connecting to " + req.ipAndPort().ip() + ":" + req.ipAndPort().port());
@@ -209,15 +227,22 @@ public class PokerClient {
                     cancelled.set(true);
                 }
                 if (cancelled.get()) {
+                    System.out.println("Poker Client >> submit >> fut listener >> canceled");
+
                     future.cancel(true);
                     if (future.channel().isOpen()) {
                         future.channel().close();
                     }
                     return;
                 }
+
                 handle.event(new State.Connected(future.channel()));
+                System.out.println("Poker Client >> submit >> fut listener >> connected");
                 handle.event(new State.SendRequest(req));
-                future = future.channel().writeAndFlush(req);
+                System.out.println("Poker Client >> submit >> fut listener >> sent");
+                var message = req.toString();
+                future = future.channel().writeAndFlush(message);
+                System.out.println("Poker Client >> submit >> fut listener >> wrote and flushed >> req : "+ message);
                 future.addListener((ChannelFutureListener) future1 -> {
                     if (cancelled.get()) {
                         future1.cancel(true);
@@ -236,111 +261,5 @@ public class PokerClient {
         }
     }
 
-
-    private class PRB implements PokerRequestBuilder {
-
-        private final List<HandlerEntry<?>> handlers = new LinkedList<>();
-        private final List<Receiver<State<?>>> any = new LinkedList<>();
-
-        private String protocolName;
-        private String protocolVersion;
-        private PokerAction action;
-        private List<ContentLine> contentLineList;
-        private IpAndPort ipAndPort;
-        private Duration timeout;
-
-
-        public PRB(PokerAction action) {
-            this.action = action;
-            this.initHeader();
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T> PokerRequestBuilder on(Class<? extends State<T>> event, Receiver<T> r) {
-            HandlerEntry<T> h = null;
-            for (HandlerEntry<?> e : handlers) {
-                if (e.state.equals(event)) {
-                    h = (HandlerEntry<T>) e;
-                    break;
-                }
-            }
-            if (h == null) {
-                h = new HandlerEntry<>(event);
-                handlers.add(h);
-            }
-            h.add(r);
-            return this;
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public <T> PokerRequestBuilder on(StateType event, Receiver<T> r) {
-            this.on((Class<? extends State<T>>) event.type(), event.wrapperReceiver(r));
-            return this;
-        }
-
-        @Override
-        public PokerRequestBuilder onEvent(Receiver<State<?>> r) {
-            any.add(r);
-            return this;
-        }
-
-        @Override
-        public PokerRequestBuilder initHeader() {
-            protocolName = "POKER";
-            protocolVersion = "1.0";
-            return this;
-        }
-
-        @Override
-        public PokerRequestBuilder action(PokerAction action) {
-            this.action = action;
-            return this;
-        }
-
-        @Override
-        public PokerRequestBuilder addContentLine(ContentLine contentLine) {
-            if (contentLineList == null) {
-                contentLineList = new ArrayList<>();
-            }
-            contentLineList.add(contentLine);
-            return this;
-        }
-
-        @Override
-        public PokerRequestBuilder ipAndPort(IpAndPort ipAndPort) {
-            this.ipAndPort = ipAndPort;
-            return this;
-        }
-
-        @Override
-        public PokerRequestBuilder timeout(Duration timeout) {
-            this.timeout = timeout;
-            return this;
-        }
-
-        @Override
-        public PokerRequest build() {
-            return new PokerRequest(ipAndPort, protocolName, protocolVersion, action, contentLineList);
-        }
-
-        @Override
-        public ResponseFuture execute(ResponseHandler<?> r) {
-            PokerRequest req = build();
-            AtomicBoolean cancelled = new AtomicBoolean();
-            ResponseFuture handle = new ResponseFuture(cancelled);
-            handle.handlers.addAll(this.handlers);
-            handle.any.addAll(this.any);
-            submit(req, cancelled, handle, r, timeout);
-            return handle;
-        }
-
-        @Override
-        public ResponseFuture execute() {
-            return execute(null);
-        }
-
-    }
 
 }

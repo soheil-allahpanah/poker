@@ -4,11 +4,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import ir.sooall.poker.player.client.message.PokerResponse;
+import io.netty.channel.ChannelHandler.Sharable;
 
 import java.util.List;
 
 
-public class CoordinatorClientHandler extends ByteToMessageDecoder {
+@Sharable
+public final class CoordinatorClientHandler extends ByteToMessageDecoder {
 
     private final PokerClient client;
 
@@ -34,25 +36,19 @@ public class CoordinatorClientHandler extends ByteToMessageDecoder {
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.readableBytes() : " + in.readableBytes());
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.readerIndex() : " + in.readerIndex());
             System.out.println("PokerMessageDecoder >> channelRead0  >> in.capacity() : " + in.capacity());
-            if (in.readableBytes() > 4) {
-                int contentLength = in.readInt();
-                System.out.println("PokerMessageDecoder >> channelRead0  >> contentLength : " + contentLength);
-                if (in.readableBytes() == contentLength) {
-                    System.out.println("PokerMessageDecoder >> channelRead0  >> in.readableBytes() == contentLength : " + true);
-                    byte[] decoded = new byte[in.readableBytes()];
-                    in.readBytes(decoded);
-                    System.out.println("PokerMessageDecoder >> channelRead0  >> new String(decoded) : " + new String(decoded));
-                    var response = PokerResponse.fromString(new String(decoded));
-                    System.out.println("PokerMessageDecoder >> channelRead0  >> response : " + response);
-                    info.handle.event(new State.ContentReceived(response));
-                    out.add(response);
-                    if (info.r != null) {
-                        info.r.internalReceive(response);
-                    }
-                    info.handle.event(new State.Finished(response));
-                    info.handle.trigger();
-                }
+            byte[] decoded = new byte[in.readableBytes()];
+            in.readBytes(decoded);
+            System.out.println("PokerMessageDecoder >> channelRead0  >> new String(decoded) : " + new String(decoded));
+            var response = PokerResponse.fromString(new String(decoded));
+            System.out.println("PokerMessageDecoder >> channelRead0  >> response : " + response);
+            info.handle.event(new State.ContentReceived(response));
+            info.cancelTimer();
+            out.add(response);
+            if (info.r != null) {
+                info.r.internalReceive(response);
             }
+            info.handle.event(new State.Finished(response));
+            info.handle.trigger();
         } catch (IllegalStateException e) {
             info.handle.event(new State.Error(e));
             e.printStackTrace();

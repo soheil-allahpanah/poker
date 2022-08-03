@@ -1,10 +1,8 @@
 package ir.sooall.poker.player.client.message;
 
-import ir.sooall.poker.player.client.message.PokerRequest;
-
 public class Test {
     public static void main(String[] args) {
-        var a = PokerRequest.builder()
+        var a = PokerRequest.builder(null)
             .header()
             .protocolName(PokerMessageHeader.POKER_PROTOCOL_NAME)
             .protocolVersion(PokerMessageHeader.POKER_PROTOCOL_VERSION)

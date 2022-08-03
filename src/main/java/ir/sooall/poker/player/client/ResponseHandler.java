@@ -5,7 +5,7 @@ import ir.sooall.poker.player.client.message.PokerResponse;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class ResponseHandler<T> {
+public abstract class ResponseHandler<T> {
 
     private final Class<T> type;
     private final CountDownLatch latch = new CountDownLatch(1);
@@ -24,18 +24,18 @@ public class ResponseHandler<T> {
 
     protected void internalReceive(PokerResponse pokerMessage) {
         try {
-            _doReceive(pokerMessage);
+            _doReceive(type.cast(pokerMessage));
             // todo : must be implemented
         } finally {
             latch.countDown();
         }
     }
 
-    void _doReceive(PokerResponse pokerMessage) {
-        receive(pokerMessage);
+    void _doReceive(T object) {
+        receive(object);
     }
 
-    protected void receive(PokerResponse pokerMessage) {
+    protected void receive(T object) {
     }
 
     protected void onErrorResponse(String content) {

@@ -1,5 +1,8 @@
 package ir.sooall.poker.player.client.message;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public enum ResponseAction {
     ACK_REGISTER("ACK-REGISTER"),
 
@@ -13,5 +16,10 @@ public enum ResponseAction {
 
     public String constant() {
         return constant;
+    }
+
+    public static ResponseAction fromConstant(String constant) {
+        return Arrays.stream(ResponseAction.values())
+            .filter(a -> Objects.equals(a.constant, constant)).findFirst().get();
     }
 }

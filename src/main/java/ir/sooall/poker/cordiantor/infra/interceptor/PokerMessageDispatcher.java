@@ -14,8 +14,10 @@ public class PokerMessageDispatcher extends SimpleChannelInboundHandler<PokerReq
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, PokerRequest request) throws Exception {
         System.out.println("PokerMessageDispatcher >> channelRead0 >> ");
-        if (request.getAction() == RequestAction.REGISTER) {
-            ctx.channel().writeAndFlush(registerPlayerController.register(request));
+        if (request.action() == RequestAction.REGISTER) {
+            var response = registerPlayerController.register(request);
+            System.out.println("PokerMessageDispatcher >> channelRead0 >> response : " + response);
+            ctx.channel().writeAndFlush(response);
         }
 
     }

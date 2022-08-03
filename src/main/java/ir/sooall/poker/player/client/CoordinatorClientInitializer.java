@@ -17,8 +17,7 @@ public class CoordinatorClientInitializer extends ChannelInitializer<Channel> {
     @Override
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        pipeline.addLast(new StringDecoder(StandardCharsets.US_ASCII));
-        pipeline.addLast(new StringEncoder(StandardCharsets.US_ASCII));
+        pipeline.addLast("encoder", new StringEncoder(StandardCharsets.US_ASCII));
         pipeline.addLast("handler", handler);
     }
 

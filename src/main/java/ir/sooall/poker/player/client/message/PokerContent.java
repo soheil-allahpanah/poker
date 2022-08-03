@@ -19,6 +19,10 @@ public class PokerContent<BuildType, Builder extends BuilderInterface<BuildType>
         return builder.build();
     }
 
+    public Builder builder() {
+        return builder;
+    }
+
     public PokerContent<BuildType, Builder> addItem(String key, String value) {
         data.put(key, value);
         return this;

@@ -11,7 +11,7 @@ public class PokerClientBuilder {
 
     private NioEventLoopGroup group;
     private Duration timeout;
-    private Integer threadCount;
+    private Integer threadCount = -1;
 
     private final List<PokerClient.ChannelOptionSetting<?>> settings = new LinkedList<>();
 

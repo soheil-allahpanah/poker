@@ -1,9 +1,9 @@
 package ir.sooall.poker.player.client.message;
 
-class PokerRequestHeader extends PokerMessageHeader {
+public class PokerRequestHeader extends PokerMessageHeader {
     private RequestAction action;
 
-    RequestAction getAction() {
+    public RequestAction action() {
         return action;
     }
 
@@ -12,7 +12,7 @@ class PokerRequestHeader extends PokerMessageHeader {
         this.action = builder.action;
     }
 
-    static class Builder<ContentBuilder> extends PokerMessageHeader.Builder<Builder<ContentBuilder>> {
+    public static class Builder<ContentBuilder> extends PokerMessageHeader.Builder<Builder<ContentBuilder>> {
         private RequestAction action;
         private final ContentBuilder contentBuilder;
 
@@ -20,12 +20,12 @@ class PokerRequestHeader extends PokerMessageHeader {
             this.contentBuilder = contentBuilder;
         }
 
-        Builder<ContentBuilder> action(RequestAction action) {
+        public Builder<ContentBuilder> action(RequestAction action) {
             this.action = action;
             return self();
         }
 
-        ContentBuilder content() {
+        public ContentBuilder content() {
             return contentBuilder;
         }
 

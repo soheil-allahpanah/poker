@@ -24,8 +24,21 @@ public final class ResponseFuture implements Comparable<ResponseFuture> {
     private Map<StateType, List<Object>> queuedToSend;
     private final EnumSet<StateType> seenStates = EnumSet.noneOf(StateType.class);
 
-    ResponseFuture(AtomicBoolean cancelled) {
+
+    public ResponseFuture(AtomicBoolean cancelled) {
         this.cancelled = cancelled;
+    }
+
+    public void addAllHandler(List<HandlerEntry<?>> handlers) {
+        if (handlers != null) {
+            this.handlers.addAll(handlers);
+        }
+    }
+
+    public void addAllAny(List<Receiver<State<?>>> any) {
+        if (any != null) {
+            this.any.addAll(any);
+        }
     }
 
     void setFuture(ChannelFuture fut) {

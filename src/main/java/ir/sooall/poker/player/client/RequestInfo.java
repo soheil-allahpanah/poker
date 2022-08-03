@@ -1,5 +1,7 @@
 package ir.sooall.poker.player.client;
 
+import ir.sooall.poker.player.client.message.PokerRequest;
+
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.TimerTask;

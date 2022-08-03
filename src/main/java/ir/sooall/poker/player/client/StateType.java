@@ -26,7 +26,7 @@ public enum StateType {
         };
     }
 
-    <T> Receiver<T> wrapperReceiver(final Receiver<?> orig) {
+    public <T> Receiver<T> wrapperReceiver(final Receiver<?> orig) {
         return new Receiver<T>() {
             @Override
             @SuppressWarnings("unchecked")
