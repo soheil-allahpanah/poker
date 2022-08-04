@@ -8,17 +8,12 @@ import java.nio.charset.StandardCharsets;
 
 public class CoordinatorClientInitializer extends ChannelInitializer<Channel> {
 
-    private final ChannelInboundHandlerAdapter handler;
-
-    CoordinatorClientInitializer(ChannelInboundHandlerAdapter handler) {
-        this.handler = handler;
-    }
-
     @Override
     protected void initChannel(Channel ch) throws Exception {
+
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast("encoder", new StringEncoder(StandardCharsets.US_ASCII));
-        pipeline.addLast("handler", handler);
+        pipeline.addLast("handler", new CoordinatorClientHandler());
     }
 
 

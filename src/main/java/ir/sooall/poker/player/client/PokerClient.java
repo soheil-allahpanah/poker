@@ -29,7 +29,6 @@ public class PokerClient {
     private final Iterable<ChannelOptionSetting<?>> settings;
     private final Timer timer = new Timer("HttpClient timeout for HttpClient@" + System.identityHashCode(this));
     static final AttributeKey<RequestInfo> KEY = AttributeKey.<RequestInfo>valueOf("info");
-    private final CoordinatorClientHandler handler;
 
     public PokerClient() {
         this(null, Collections.emptyList(), null, 12);
@@ -39,7 +38,6 @@ public class PokerClient {
         group = threadPool == null ? new NioEventLoopGroup(threads, new TF()) : threadPool;
         this.timeout = timeout;
         this.settings = settings == null ? Collections.emptySet() : settings;
-        this.handler = new CoordinatorClientHandler(this);
 
     }
 
@@ -47,7 +45,7 @@ public class PokerClient {
         if (bootstrap == null) {
             bootstrap = new Bootstrap();
             bootstrap.group(group);
-            bootstrap.handler(new CoordinatorClientInitializer(handler));
+            bootstrap.handler(new CoordinatorClientInitializer());
             bootstrap.option(ChannelOption.TCP_NODELAY, true);
             bootstrap.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
             bootstrap.option(ChannelOption.SO_REUSEADDR, false);

@@ -4,19 +4,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import ir.sooall.poker.player.client.message.PokerResponse;
-import io.netty.channel.ChannelHandler.Sharable;
 
 import java.util.List;
 
 
-@Sharable
 public final class CoordinatorClientHandler extends ByteToMessageDecoder {
 
-    private final PokerClient client;
-
-    public CoordinatorClientHandler(PokerClient client) {
-        this.client = client;
-    }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
