@@ -3,9 +3,9 @@ package ir.sooall.poker.cordiantor;
 import ir.sooall.poker.cordiantor.adaptor.in.contorller.RegisterPlayerController;
 import ir.sooall.poker.cordiantor.adaptor.out.repository.PlayerRepositoryImpl;
 import ir.sooall.poker.cordiantor.domain.repository.PlayerRepository;
-import ir.sooall.poker.cordiantor.infra.server.CoordinatorAppBootstrap;
-import ir.sooall.poker.cordiantor.infra.server.CoordinatorServerInitializer;
-import ir.sooall.poker.cordiantor.infra.config.ServiceRegistry;
+import ir.sooall.poker.framwork.server.server.CoordinatorAppBootstrap;
+import ir.sooall.poker.framwork.server.server.CoordinatorServerInitializer;
+import ir.sooall.poker.framwork.server.config.ServiceRegistry;
 import ir.sooall.poker.cordiantor.usecase.registerplayer.RegisterPlayerUseCase;
 import ir.sooall.poker.cordiantor.usecase.registerplayer.RegisterPlayerUseCaseImpl;
 

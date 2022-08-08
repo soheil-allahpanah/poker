@@ -1,11 +1,11 @@
 package ir.sooall.poker.player;
 
-import ir.sooall.poker.player.client.PokerClient;
-import ir.sooall.poker.player.client.ResponseHandler;
-import ir.sooall.poker.player.client.message.PokerMessageHeader;
-import ir.sooall.poker.player.client.message.PokerProtocolConstantKey;
-import ir.sooall.poker.player.client.message.PokerResponse;
-import ir.sooall.poker.player.client.message.ResponseAction;
+import ir.sooall.poker.framwork.client.PokerClient;
+import ir.sooall.poker.framwork.client.ResponseHandler;
+import ir.sooall.poker.framwork.client.message.PokerMessageHeader;
+import ir.sooall.poker.framwork.client.message.PokerProtocolConstantKey;
+import ir.sooall.poker.framwork.client.message.PokerResponse;
+import ir.sooall.poker.framwork.client.message.ResponseAction;
 import ir.sooall.poker.player.server.PlayerAppBootstrap;
 import ir.sooall.poker.player.server.PlayerServerInitializer;
 
@@ -24,6 +24,8 @@ public class PlayerApp {
     public static void main(String[] args) throws Exception {
         PokerClient client = PokerClient.builder().build();
         new PlayerAppBootstrap().config(new PlayerServerInitializer()).run(PORT);
+
+
         executorService.scheduleWithFixedDelay(() -> {
             try {
                 client.register()
@@ -42,7 +44,9 @@ public class PlayerApp {
                         @Override
                         protected void receive(PokerResponse pokerMessage) {
                             if (pokerMessage.action().equals(ResponseAction.ACK_REGISTER)) {
-                                executorService.shutdown();
+                                System.out.println("ACK_REGISTER");
+                            } else if (pokerMessage.action().equals(ResponseAction.NACK_REGISTER)) {
+                                System.out.println("ResponseAction.NACK_REGISTER");
                             }
                         }
 
@@ -54,7 +58,6 @@ public class PlayerApp {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
 
         }, 1, 10, TimeUnit.SECONDS);
     }

@@ -4,7 +4,7 @@ import ir.sooall.poker.common.mapper.Message2ObjectMapper;
 import ir.sooall.poker.common.mapper.Object2MessageMapper;
 import ir.sooall.poker.common.model.Player;
 import ir.sooall.poker.common.model.ValueObjects;
-import ir.sooall.poker.player.client.message.*;
+import ir.sooall.poker.framwork.client.message.*;
 
 import java.util.UUID;
 

@@ -2,8 +2,8 @@ package ir.sooall.poker.cordiantor.adaptor.in.contorller;
 
 import ir.sooall.poker.cordiantor.handler.PokerRegistrationProcessMessageMapper;
 import ir.sooall.poker.cordiantor.usecase.registerplayer.RegisterPlayerUseCase;
-import ir.sooall.poker.player.client.message.PokerRequest;
-import ir.sooall.poker.player.client.message.PokerResponse;
+import ir.sooall.poker.framwork.client.message.PokerRequest;
+import ir.sooall.poker.framwork.client.message.PokerResponse;
 
 public class RegisterPlayerController {
     private final RegisterPlayerUseCase registerPlayerUseCase;
