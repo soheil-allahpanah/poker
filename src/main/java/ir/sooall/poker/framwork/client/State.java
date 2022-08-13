@@ -1,8 +1,8 @@
 package ir.sooall.poker.framwork.client;
 
 import io.netty.channel.Channel;
-import ir.sooall.poker.framwork.client.message.PokerRequest;
-import ir.sooall.poker.framwork.client.message.PokerResponse;
+import ir.sooall.poker.framwork.message.PokerRequest;
+import ir.sooall.poker.framwork.message.PokerResponse;
 
 import java.time.Duration;
 

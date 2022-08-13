@@ -3,7 +3,7 @@ package ir.sooall.poker.framwork.client;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import ir.sooall.poker.framwork.client.message.PokerRequest;
+import ir.sooall.poker.framwork.message.PokerRequest;
 
 public class PokerRequestEncoder extends MessageToByteEncoder<PokerRequest> {
 

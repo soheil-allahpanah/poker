@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.util.ReferenceCountUtil;
-import ir.sooall.poker.framwork.client.message.PokerResponse;
+import ir.sooall.poker.framwork.message.PokerResponse;
 
 import java.util.List;
 

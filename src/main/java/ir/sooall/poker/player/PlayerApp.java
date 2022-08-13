@@ -2,10 +2,10 @@ package ir.sooall.poker.player;
 
 import ir.sooall.poker.framwork.client.PokerClient;
 import ir.sooall.poker.framwork.client.ResponseHandler;
-import ir.sooall.poker.framwork.client.message.PokerMessageHeader;
-import ir.sooall.poker.framwork.client.message.PokerProtocolConstantKey;
-import ir.sooall.poker.framwork.client.message.PokerResponse;
-import ir.sooall.poker.framwork.client.message.ResponseAction;
+import ir.sooall.poker.framwork.message.PokerMessageHeader;
+import ir.sooall.poker.framwork.message.PokerProtocolConstantKey;
+import ir.sooall.poker.framwork.message.PokerResponse;
+import ir.sooall.poker.framwork.message.ResponseAction;
 import ir.sooall.poker.player.server.PlayerAppBootstrap;
 import ir.sooall.poker.player.server.PlayerServerInitializer;
 

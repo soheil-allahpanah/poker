@@ -4,8 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import ir.sooall.framwork.di.Configor;
 import ir.sooall.poker.cordiantor.adaptor.in.contorller.RegisterPlayerController;
-import ir.sooall.poker.framwork.client.message.PokerRequest;
-import ir.sooall.poker.framwork.client.message.RequestAction;
+import ir.sooall.poker.framwork.message.PokerRequest;
+import ir.sooall.poker.framwork.message.RequestAction;
 
 public class PokerMessageDispatcher extends SimpleChannelInboundHandler<PokerRequest> {
 

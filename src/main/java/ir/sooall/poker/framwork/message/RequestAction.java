@@ -1,4 +1,4 @@
-package ir.sooall.poker.framwork.client.message;
+package ir.sooall.poker.framwork.message;
 
 import java.util.Arrays;
 import java.util.Objects;

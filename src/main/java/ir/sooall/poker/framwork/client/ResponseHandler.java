@@ -1,6 +1,6 @@
 package ir.sooall.poker.framwork.client;
 
-import ir.sooall.poker.framwork.client.message.PokerResponse;
+import ir.sooall.poker.framwork.message.PokerResponse;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;

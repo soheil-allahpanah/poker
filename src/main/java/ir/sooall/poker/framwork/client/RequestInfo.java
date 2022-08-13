@@ -1,6 +1,6 @@
 package ir.sooall.poker.framwork.client;
 
-import ir.sooall.poker.framwork.client.message.PokerRequest;
+import ir.sooall.poker.framwork.message.PokerRequest;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;

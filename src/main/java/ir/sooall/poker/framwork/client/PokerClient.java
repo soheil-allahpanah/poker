@@ -8,8 +8,8 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.AttributeKey;
-import ir.sooall.poker.framwork.client.message.PokerRequest;
-import ir.sooall.poker.framwork.client.message.RequestAction;
+import ir.sooall.poker.framwork.message.PokerRequest;
+import ir.sooall.poker.framwork.message.RequestAction;
 
 import java.net.ConnectException;
 import java.time.Duration;

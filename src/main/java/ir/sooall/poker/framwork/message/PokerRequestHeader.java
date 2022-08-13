@@ -1,4 +1,4 @@
-package ir.sooall.poker.framwork.client.message;
+package ir.sooall.poker.framwork.message;
 
 public class PokerRequestHeader extends PokerMessageHeader {
     private RequestAction action;
