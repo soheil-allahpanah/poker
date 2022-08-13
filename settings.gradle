@@ -1,2 +1,6 @@
 rootProject.name = 'poker'
-
+sourceControl {
+  gitRepository("https://github.com/soheil-allahpanah/simple-dependency-injection.git") {
+    producesModule("ir.sooall:simple-dependency-injection")
+  }
+}

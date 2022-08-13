@@ -1,5 +1,6 @@
 package ir.sooall.poker.cordiantor;
 
+import ir.sooall.framwork.di.Configor;
 import ir.sooall.poker.cordiantor.adaptor.in.contorller.RegisterPlayerController;
 import ir.sooall.poker.cordiantor.adaptor.out.repository.PlayerRepositoryImpl;
 import ir.sooall.poker.cordiantor.domain.repository.PlayerRepository;
@@ -14,9 +15,7 @@ public class CoordinatorApp {
 
     public static void main(String[] args) throws Exception {
 
-        ServiceRegistry.addService(PlayerRepository.class, new PlayerRepositoryImpl());
-        ServiceRegistry.addService(RegisterPlayerUseCase.class, new RegisterPlayerUseCaseImpl(ServiceRegistry.getService(PlayerRepository.class)));
-        ServiceRegistry.addService(RegisterPlayerController.class, new RegisterPlayerController(ServiceRegistry.getService(RegisterPlayerUseCase.class)));
+        Configor.run(CoordinatorApp.class);
         new CoordinatorAppBootstrap().config(new CoordinatorServerInitializer()).run(PORT);
 
     }
