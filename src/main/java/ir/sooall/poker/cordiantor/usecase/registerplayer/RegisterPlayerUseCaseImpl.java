@@ -18,6 +18,7 @@ public class RegisterPlayerUseCaseImpl implements RegisterPlayerUseCase {
         if(Objects.nonNull(storedPlayer)) {
             throw new IllegalStateException("Player already exists");
         }
-        return playerRepository.save(request);
+        playerRepository.save(request);
+        return playerRepository.findById(request.id());
     }
 }

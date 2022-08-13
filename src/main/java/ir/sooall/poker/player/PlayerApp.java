@@ -44,7 +44,8 @@ public class PlayerApp {
                         @Override
                         protected void receive(PokerResponse pokerMessage) {
                             if (pokerMessage.action().equals(ResponseAction.ACK_REGISTER)) {
-                                System.out.println("ACK_REGISTER");
+                                System.out.println("ResponseAction.ACK_REGISTER");
+                                executorService.shutdown();
                             } else if (pokerMessage.action().equals(ResponseAction.NACK_REGISTER)) {
                                 System.out.println("ResponseAction.NACK_REGISTER");
                             }

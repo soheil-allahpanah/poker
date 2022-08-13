@@ -13,7 +13,7 @@ public class Table<T, V> {
         return map.get(id);
     }
 
-    public V save(T t, V v) {
-        return map.put(t, v);
+    public void save(T t, V v) {
+        map.put(t, v);
     }
 }

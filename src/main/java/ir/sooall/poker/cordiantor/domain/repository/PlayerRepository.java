@@ -6,5 +6,5 @@ import ir.sooall.poker.common.model.ValueObjects;
 public interface PlayerRepository {
     Player findById(ValueObjects.PlayerId id);
 
-    Player save(Player player);
+    void save(Player player);
 }
