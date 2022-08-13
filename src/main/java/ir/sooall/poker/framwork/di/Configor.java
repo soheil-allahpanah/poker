@@ -6,10 +6,8 @@ import org.burningwave.core.assembler.ComponentContainer;
 import org.burningwave.core.classes.ClassCriteria;
 import org.burningwave.core.classes.ClassHunter;
 import org.burningwave.core.classes.SearchConfig;
-import org.burningwave.core.function.TriFunction;
 
 import javax.management.RuntimeErrorException;
-import java.lang.invoke.MethodHandle;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -17,7 +15,7 @@ import java.util.stream.Collectors;
 public class Configor {
     public Map<Class<?>, Class<?>> diMap;
     public Map<Class<?>, Object> applicationScope;
-    public Map<Class<?>, BeanUtil.ContextAndMethod> handleMap;
+    public Map<Class<?>, BeanUtil.ContextAndMethodHandle> handleMap;
 
 
     private static Configor configor;
@@ -32,7 +30,7 @@ public class Configor {
 
     public static void run(Class<?> mainClass) {
         try {
-            synchronized (Injector.class) {
+            synchronized (Configor.class) {
                 if (configor == null) {
                     configor = new Configor();
                     configor.initFramework(mainClass);
@@ -67,9 +65,21 @@ public class Configor {
 
         try (ClassHunter.SearchResult result = classHunter.findBy(searchConfig)) {
             Collection<Class<?>> types = result.getClasses();
+            System.out.println("Configor >> initFramework >> types : ");
+            types.forEach(System.out::println);
             var handlers = BeanUtil.handlers(types);
+            System.out.println("Configor >> initFramework >> handlers : ");
+            handlers.forEach(System.out::println);
             iterateOverHandlers(handlers, putInDiMap, invokeHandler);
+            System.out.println("Configor >> initFramework >> putInDiMap : ");
+            diMap.entrySet().forEach(System.out::println);
+
+            System.out.println("Configor >> initFramework >> applicationScope >> handler with no arguments : ");
+            applicationScope.entrySet().forEach(System.out::println);
+
             iterateOverHandlers(handlers, resolveDependencies);
+            System.out.println("Configor >> initFramework >> applicationScope >> handler with arguments: ");
+            applicationScope.entrySet().forEach(System.out::println);
 
 
         } catch (Throwable e) {
@@ -77,7 +87,7 @@ public class Configor {
         }
     }
 
-    private final Function<BeanUtil.ContextAndMethod, Void> putInDiMap = (contextAndHandler) -> {
+    private final Function<BeanUtil.ContextAndMethodHandle, Void> putInDiMap = (contextAndHandler) -> {
         var returnType = contextAndHandler.getHandle().type().returnType();
         var interfaces = returnType.getInterfaces();
 
@@ -93,10 +103,11 @@ public class Configor {
     };
 
 
-    private final Function<BeanUtil.ContextAndMethod, Void> invokeHandler = (contextAndHandler) -> {
+    private final Function<BeanUtil.ContextAndMethodHandle, Void> invokeHandler = (contextAndHandler) -> {
         if (contextAndHandler.getHandle().type().parameterCount() == 1) {
             try {
-                applicationScope.put(contextAndHandler.getHandle().type().returnType(), contextAndHandler.getHandle().invoke(contextAndHandler.getContext()));
+                applicationScope.put(contextAndHandler.getHandle().type().returnType()
+                    , contextAndHandler.getHandle().invoke(contextAndHandler.getContext()));
             } catch (Throwable e) {
                 return null;
             }
@@ -104,7 +115,7 @@ public class Configor {
         return null;
     };
 
-    private final Function<BeanUtil.ContextAndMethod, Void> resolveDependencies = (contextAndHandler) -> {
+    private final Function<BeanUtil.ContextAndMethodHandle, Void> resolveDependencies = (contextAndHandler) -> {
         try {
             BeanUtil.resolve(this, contextAndHandler);
         } catch (Throwable e) {
@@ -115,8 +126,8 @@ public class Configor {
 
 
     @SafeVarargs
-    private void iterateOverHandlers(List<BeanUtil.ContextAndMethod> contextAndHandlers
-        , Function<BeanUtil.ContextAndMethod, Void>... functions) {
+    private void iterateOverHandlers(List<BeanUtil.ContextAndMethodHandle> contextAndHandlers
+        , Function<BeanUtil.ContextAndMethodHandle, Void>... functions) {
         for (var contextAndHandler : contextAndHandlers) {
             Arrays.stream(functions).forEach(fn -> fn.apply(contextAndHandler));
         }

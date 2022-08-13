@@ -11,11 +11,11 @@ import java.util.*;
 
 public class BeanUtil {
 
-    public static class ContextAndMethod {
+    public static class ContextAndMethodHandle {
         private final Object context;
         private final MethodHandle handle;
 
-        public ContextAndMethod(Object context, MethodHandle handle) {
+        public ContextAndMethodHandle(Object context, MethodHandle handle) {
             this.context = context;
             this.handle = handle;
         }
@@ -27,29 +27,39 @@ public class BeanUtil {
         public MethodHandle getHandle() {
             return handle;
         }
+
+        @Override
+        public String toString() {
+            return "ContextAndMethodHandle{" +
+                "context=" + context +
+                ", handle=" + handle +
+                '}';
+        }
     }
 
     private BeanUtil() {
         super();
     }
 
-    public static List<BeanUtil.ContextAndMethod> handlers(Collection<Class<?>> clazzes) throws Throwable {
+    public static List<ContextAndMethodHandle> handlers(Collection<Class<?>> clazzes) throws Throwable {
         var publicLookup = MethodHandles.publicLookup();
-        var flattenMethodHandlers = new ArrayList<BeanUtil.ContextAndMethod>();
+        var flattenMethodHandlers = new ArrayList<ContextAndMethodHandle>();
         for (var clazz : clazzes) {
             var instance = clazz.getDeclaredConstructor().newInstance();
-            var methodHandlers = Arrays.stream(clazz.getDeclaredMethods()).filter(m -> m.isAnnotationPresent(Bean.class))
+            var methodHandlers = Arrays.stream(clazz.getDeclaredMethods())
+                .filter(m -> m.isAnnotationPresent(Bean.class))
                 .map(method -> {
                     var type = MethodType.methodType(method.getReturnType(), method.getParameterTypes());
                     var name = method.getName();
                     try {
-                        return new ContextAndMethod(instance, publicLookup.findVirtual(clazz, name, type));
+                        return new ContextAndMethodHandle(instance, publicLookup.findVirtual(clazz, name, type));
                     } catch (NoSuchMethodException | IllegalAccessException e) {
                         e.printStackTrace();
                         return null;
                     }
 
-                }).toList();
+                })
+                .filter(Objects::nonNull).toList();
             flattenMethodHandlers.addAll(methodHandlers);
         }
         return flattenMethodHandlers;
@@ -57,28 +67,54 @@ public class BeanUtil {
     }
 
 
-    public static void resolve(Configor configor, ContextAndMethod contextAndMethod) throws Throwable {
-        var handle = contextAndMethod.getHandle();
-        var resolvedClass = configor.getBeanInstance(handle.type().returnType());
-        if (resolvedClass == null) {
-            List<Object> satisfiedParamObjects = new ArrayList<>();
-            List<Class<?>> unSatisfiedParams = new ArrayList<>();
+    public static void resolve(Configor configor, ContextAndMethodHandle contextAndMethodHandle) throws Throwable {
+        System.out.println("BeanUtil >> resolve >> " + contextAndMethodHandle);
+        var handle = contextAndMethodHandle.getHandle();
+        var resolvedObject = configor.getBeanInstance(handle.type().returnType());
+        System.out.println("BeanUtil >> resolve >> resolvedObjects " + resolvedObject);
+        if (resolvedObject == null) {
+            List<Object> resolvedObjects = new ArrayList<>();
+            List<Class<?>> unresolvedParams = new ArrayList<>();
             var paramList = handle.type().parameterList();
             for (var param : paramList.subList(1, paramList.size())) {
                 if (configor.applicationScope.containsKey(param)) {
-                    satisfiedParamObjects.add(configor.applicationScope.get(param));
+                    resolvedObjects.add(configor.applicationScope.get(param));
                 } else {
-                    unSatisfiedParams.add(param);
+                    unresolvedParams.add(param);
                 }
             }
-            if (satisfiedParamObjects.size() != handle.type().parameterCount() - 1) {
-                for (var param : unSatisfiedParams) {
+            System.out.println("BeanUtil >> resolve >> resolvedObjects ");
+            resolvedObjects.forEach(System.out::println);
+            System.out.println("BeanUtil >> resolve >> unresolvedParams ");
+            unresolvedParams.forEach(System.out::println);
+
+            System.out.println("BeanUtil >> resolve >> resolvedObjects.size() != handle.type().parameterCount() - 1 : "
+                + (resolvedObjects.size() != handle.type().parameterCount() - 1));
+            if (resolvedObjects.size() != handle.type().parameterCount() - 1) {
+                for (var param : unresolvedParams) {
+                    System.out.println("-----------recursive call begin---------------");
                     resolve(configor, configor.handleMap.get(param));
+                    resolvedObjects.add(configor.applicationScope.get(param));
+                    System.out.println("-----------recursive call end-----------------");
+//                    configor.applicationScope.put(handle.type().returnType(), result);
+
                 }
-            } else {
-                configor.applicationScope.put(handle.type().returnType(), handle.invoke(contextAndMethod.getContext(), satisfiedParamObjects.toArray()));
             }
+            resolvedObjects.forEach(System.out::println);
+            System.out.println(handle.type().returnType());
+            System.out.println(contextAndMethodHandle.getContext());
+            Object[] args = new Object[resolvedObjects.size() + 1];
+            args[0] = contextAndMethodHandle.getContext();
+            for (int i = 1; i < args.length; i++) {
+                args[i] = resolvedObjects.get(i - 1);
+            }
+            var result = handle.invokeWithArguments(args);
+            System.out.println(result);
+            configor.applicationScope.put(handle.type().returnType(), result);
+
+//                return result;
         }
+//        return resolvedObject;
 
     }
 
